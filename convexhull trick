@@ -1,0 +1,151 @@
+https://vjudge.net/contest/629154
+//pass : goodtimemakethings
+#include <bits/stdc++.h>
+
+using namespace std;
+using ll = long long;
+using ld = long double;
+using ull = unsigned long long;
+
+constexpr bool typetest = 0;
+constexpr int N = 2e5 + 5;
+constexpr int M = 5e5 + 5;
+
+struct ConvexHullTrick {
+    const ll Inf = 1e18;
+
+    int n;
+    ll a[N], b[N];
+
+    vector<int> line;
+    vector<ld> point;
+
+    ConvexHullTrick() {
+        point.emplace_back(-Inf);
+    }
+
+    ld ff(int x, int y) {
+        return (ld) 1.0 * (b[x] - b[y]) / (a[y] - a[x]);
+    }
+
+    void Add(int i) {
+        while (!line.empty()) {
+            if (a[line.back()] == a[i]) {
+                if (b[line.back()] > b[i]) {
+                    break;
+                } else {
+                    
+                    line.pop_back();
+                    if (!line.empty()) {
+                        point.pop_back();
+                    }
+                }
+            } else {
+                if (line.size() < 2) {
+                    break;
+                }
+
+                if (ff(i, line[line.size() - 2]) < ff(i, line.back())) {
+                    break;
+                } else {
+                    line.pop_back();
+
+                    if (!line.empty()) {
+                        point.pop_back();
+                    }
+                }
+            }
+        }
+
+        if (line.empty() || a[line.back()] != a[i]) {
+            if (!line.empty()) {
+                point.emplace_back(ff(i, line.back()));
+            }
+
+            line.emplace_back(i);
+        }
+    }
+
+    void Build() {
+        vector<int> id;
+
+        for (int i = 1; i <= n; ++i) {
+            id.emplace_back(i);
+        }
+
+        sort(id.begin(), id.end(), [&](const int &x, const int &y) {
+            return a[x] < a[y];
+        });
+
+        for (int i : id) {
+            Add(i);
+        }
+    }
+
+    ll get(ll x) {
+        int j = upper_bound(point.begin(), point.end(), (ld) x) - point.begin() - 1;
+
+        return a[line[j]] * x + b[line[j]];
+    }
+};
+
+ConvexHullTrick f;
+
+void Read() {
+    cin >> f.n;
+    for (int i = 1; i <= f.n; ++i) {
+        cin >> f.a[i] >> f.b[i];
+    }
+}
+
+void Solve() {
+    f.Build();
+
+    int m;
+    cin >> m;
+    while (m--) {
+        long long x;
+        cin >> x;
+
+        cout << f.get(x) << "\n";
+    }
+}
+
+int32_t main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+
+    if (fopen("tests.inp", "r"))
+    {
+        freopen("test.inp", "r", stdin);
+        freopen("test.out", "w", stdout);
+    }
+
+    int t(1);
+    if (typetest)
+        cin >> t;
+
+    for (int _ = 1; _ <= t; ++_)
+    {
+        // cout << "Case #" << _ << endl;
+        Read();
+        int startTime = 1000 * clock() / CLOCKS_PER_SEC;
+        Solve();
+        int endTime = 1000 * clock() / CLOCKS_PER_SEC;
+        cerr << "\nTime elapsed: " << endTime - startTime << "ms\n";
+    }
+}
+
+/*
+Input:
+2
+5
+2 3 6 12 17
+8
+6 12 8 10 15 12 18 16
+
+Output:
+9
+*/
